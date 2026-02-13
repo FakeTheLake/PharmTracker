@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ФармТрекер – Трекер приёма лекарств</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-slate-50 min-h-screen font-sans text-slate-700">
+
+<!-- ═══════════════════════════════════════════
+     HEADER
+═══════════════════════════════════════════ -->
+<header class="bg-white shadow-sm sticky top-0 z-40 border-b border-slate-100">
+    <div class="max-w-lg md:max-w-2xl lg:max-w-3xl mx-auto px-4 py-4 flex items-center justify-center">
+        <h1 class="text-xl font-semibold text-emerald-600 flex items-center gap-2">
+            <span class="text-2xl">💊</span> ФармТрекер
+        </h1>
+    </div>
+</header>
+
+<!-- ═══════════════════════════════════════════
+     MAIN – Dynamic content area
+═══════════════════════════════════════════ -->
+<main id="mainContent" class="max-w-lg md:max-w-2xl lg:max-w-3xl mx-auto pb-24">
+
+    <!-- ─── Главная (Home) ─── -->
+    <section id="sectionHome" class="section hidden">
+        <div class="p-4 space-y-4">
+
+            <!-- Today Summary -->
+            <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl shadow-md p-5 text-white">
+                <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">📊 Сводка на сегодня</h2>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-white/20 backdrop-blur-sm rounded-xl p-3 text-center">
+                        <div id="statPlanned" class="text-2xl font-bold">0</div>
+                        <div class="text-xs opacity-90">Запланировано</div>
+                    </div>
+                    <div class="bg-white/20 backdrop-blur-sm rounded-xl p-3 text-center">
+                        <div id="statTaken" class="text-2xl font-bold">0</div>
+                        <div class="text-xs opacity-90">Принято</div>
+                    </div>
+                    <div class="bg-white/20 backdrop-blur-sm rounded-xl p-3 text-center">
+                        <div id="statRemaining" class="text-2xl font-bold">0</div>
+                        <div class="text-xs opacity-90">Осталось</div>
+                    </div>
+                </div>
+                <button id="homeGoToTodayBtn"
+                    class="mt-4 w-full bg-white/20 hover:bg-white/30 active:bg-white/40 backdrop-blur-sm text-white font-medium py-2.5 px-4 rounded-xl text-sm transition-colors duration-200 flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    Расписание на сегодня
+                </button>
+            </div>
+
+            <!-- Active Medications -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+                <h3 class="text-base font-semibold text-slate-700 mb-3 flex items-center gap-2">💊 Что принимаю сейчас</h3>
+                <div id="homeActiveMeds">
+                    <p class="text-sm text-slate-400 text-center py-4">Нет активных курсов</p>
+                </div>
+            </div>
+
+            <!-- Profile / Settings -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+                <h3 class="text-base font-semibold text-slate-700 mb-4 flex items-center gap-2">⚙️ Профиль</h3>
+                <div class="space-y-4">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" id="settingNotifications" class="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+                        <span class="text-sm font-medium text-slate-600">Включить напоминания</span>
+                    </label>
+                    <div class="space-y-1.5">
+                        <label for="settingDefaultTime" class="block text-sm font-medium text-slate-600">Время по умолчанию</label>
+                        <input type="time" id="settingDefaultTime" value="08:00"
+                            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label for="settingRepeatInterval" class="block text-sm font-medium text-slate-600">Интервал повторения</label>
+                        <select id="settingRepeatInterval"
+                            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 appearance-none cursor-pointer">
+                            <option value="5">5 мин</option>
+                            <option value="10">10 мин</option>
+                            <option value="30">30 мин</option>
+                            <option value="60">1 час</option>
+                            <option value="0" selected>Не повторять</option>
+                        </select>
+                    </div>
+                    <button type="button" id="saveSettingsBtn"
+                        class="w-full bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white font-medium py-2.5 px-4 rounded-xl shadow-sm transition-colors duration-200">
+                        Сохранить настройки
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── Календарь (Calendar) ─── -->
+    <section id="sectionCalendar" class="section hidden">
+        <div class="p-4 space-y-4">
+
+            <!-- Month View -->
+            <div id="calendarMonthView">
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mb-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <button id="calendarPrevMonth" class="px-3 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-lg transition-colors duration-200 flex items-center gap-1">
+                            <span>◀</span> Пред
+                        </button>
+                        <h2 id="calendarMonthTitle" class="text-lg font-semibold text-slate-700">Январь 2025</h2>
+                        <button id="calendarNextMonth" class="px-3 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-lg transition-colors duration-200 flex items-center gap-1">
+                            След <span>▶</span>
+                        </button>
+                    </div>
+                    <button id="calendarTodayBtn" class="w-full mb-3 px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 active:bg-indigo-200 rounded-lg transition-colors duration-200">
+                        Сегодня
+                    </button>
+                    <!-- Day name headers -->
+                    <div class="grid grid-cols-7 gap-1 mb-2">
+                        <div class="text-center text-xs font-medium text-slate-500 py-2">Пн</div>
+                        <div class="text-center text-xs font-medium text-slate-500 py-2">Вт</div>
+                        <div class="text-center text-xs font-medium text-slate-500 py-2">Ср</div>
+                        <div class="text-center text-xs font-medium text-slate-500 py-2">Чт</div>
+                        <div class="text-center text-xs font-medium text-slate-500 py-2">Пт</div>
+                        <div class="text-center text-xs font-medium text-red-400 py-2">Сб</div>
+                        <div class="text-center text-xs font-medium text-red-400 py-2">Вс</div>
+                    </div>
+                    <div id="calendarGrid" class="grid grid-cols-7 gap-1"></div>
+                </div>
+
+                <!-- Legend -->
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mb-4">
+                    <h3 class="text-sm font-medium text-slate-500 mb-3">Обозначения</h3>
+                    <div class="flex flex-wrap gap-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-sm font-medium text-indigo-700">15</div>
+                            <span class="text-xs text-slate-500">Сегодня</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 bg-white border-2 border-indigo-500 rounded-lg flex items-center justify-center text-sm font-medium text-slate-700">20</div>
+                            <span class="text-xs text-slate-500">Выбранный день</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 bg-indigo-100 border-2 border-indigo-500 rounded-lg flex items-center justify-center text-sm font-medium text-indigo-700">15</div>
+                            <span class="text-xs text-slate-500">Сегодня и выбран</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                            <span class="text-xs text-slate-500">Есть приёмы</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions for selected day -->
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
+                    <h3 class="text-sm font-medium text-slate-500 mb-3">Действия для выбранного дня</h3>
+                    <div id="calendarSelectedDateDisplay" class="mb-4 p-3 bg-slate-50 rounded-xl text-center">
+                        <span class="text-slate-400 text-sm">День не выбран</span>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <button id="calendarViewScheduleBtn" disabled
+                            class="w-full px-4 py-3 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 active:bg-blue-200 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed rounded-xl transition-colors duration-200 flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                            Просмотр расписания
+                        </button>
+                        <button id="calendarStartCourseBtn" disabled
+                            class="w-full px-4 py-3 text-sm font-medium text-violet-600 bg-violet-50 hover:bg-violet-100 active:bg-violet-200 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed rounded-xl transition-colors duration-200 flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                            Начать курс с этого дня
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day View -->
+            <div id="calendarDayView" class="hidden">
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mb-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <button id="dayViewPrevDay" class="px-3 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-lg transition-colors duration-200">←</button>
+                        <div class="text-center">
+                            <h2 id="dayViewTitle" class="text-lg font-semibold text-slate-700">01.01.2025</h2>
+                            <p id="dayViewWeekday" class="text-xs text-slate-400"></p>
+                        </div>
+                        <button id="dayViewNextDay" class="px-3 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-lg transition-colors duration-200">→</button>
+                    </div>
+                    <button id="dayViewBackBtn"
+                        class="w-full mt-2 px-4 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                        Вернуться к календарю
+                    </button>
+                </div>
+                <div id="dayScheduleContent"></div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ─── Курсы (Courses) ─── -->
+    <section id="sectionCourses" class="section hidden">
+        <div class="p-4 space-y-4">
+            <div class="md:grid md:grid-cols-2 md:gap-6">
+
+            <!-- Course Creation Form -->
+            <form id="addCourseForm" class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4 mb-4 md:mb-0">
+                <div class="border-b border-slate-100 pb-3 mb-2">
+                    <h3 id="courseFormTitle" class="text-lg font-semibold text-slate-700 flex items-center gap-2">
+                        <span class="text-xl">📋</span> Новый курс приёма
+                    </h3>
+                    <p class="text-sm text-slate-400 mt-1">Поля со звёздочкой обязательны</p>
+                </div>
+
+                <!-- Package select -->
+                <div class="space-y-1.5">
+                    <label for="coursePackageSelect" class="block text-sm font-medium text-slate-600">Упаковка <span class="text-red-400">*</span></label>
+                    <select id="coursePackageSelect" name="packageId"
+                        class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-200 appearance-none cursor-pointer">
+                        <option value="" disabled selected>Выберите упаковку</option>
+                    </select>
+                    <p id="errorCoursePackage" class="text-xs text-red-500 hidden">Выберите упаковку</p>
+                </div>
+
+                <!-- Course name -->
+                <div class="space-y-1.5">
+                    <label for="courseCourseName" class="block text-sm font-medium text-slate-600">Название курса <span class="text-red-400">*</span></label>
+                    <div class="relative">
+                        <input type="text" id="courseCourseName" placeholder="Введите название курса"
+                            class="w-full px-4 py-2.5 pr-10 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-200">
+                        <button type="button" data-clear-course-field="courseCourseName" class="clear-course-field-btn absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 hidden" title="Очистить поле">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    <p id="errorCourseName" class="text-xs text-red-500 hidden">Обязательное поле</p>
+                </div>
+
+                <!-- Active substance -->
+                <div class="space-y-1.5">
+                    <label for="courseActiveSubstance" class="block text-sm font-medium text-slate-600">Действующее вещество</label>
+                    <div class="relative">
+                        <input type="text" id="courseActiveSubstance" placeholder="Введите действующее вещество"
+                            class="w-full px-4 py-2.5 pr-10 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-200">
+                        <button type="button" data-clear-course-field="courseActiveSubstance" class="clear-course-field-btn absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 hidden" title="Очистить поле">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    <p class="text-xs text-slate-400">Необязательное поле</p>
+                </div>
+
+                <!-- Current stock -->
+                <div class="space-y-1.5">
+                    <label for="courseCurrentStock" class="block text-sm font-medium text-slate-600">Текущий остаток</label>
+                    <div class="relative">
+                        <input type="text" id="courseCurrentStock" placeholder="0" data-decimal
+                            class="w-full px-4 py-2.5 pr-10 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-200">
+                        <button type="button" data-clear-course-field="courseCurrentStock" class="clear-course-field-btn absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 hidden" title="Очистить поле">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    <p class="text-xs text-slate-400">Необязательное поле. Можно использовать десятичные (например: 0,5)</p>
+                </div>
+
+                <!-- Start date -->
+                <div class="space-y-1.5">
+                    <label for="courseStartDate" class="block text-sm font-medium text-slate-600">Дата начала <span class="text-red-400">*</span></label>
+                    <input type="date" id="courseStartDate"
+                        class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-200">
+                    <p id="errorCourseStartDate" class="text-xs text-red-500 hidden">Выберите дату начала</p>
+                </div>
+
+                <!-- Lifelong -->
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" id="courseIsLifelong" class="w-5 h-5 rounded border-slate-300 text-violet-600 focus:ring-violet-500 cursor-pointer">
+                    <div>
+                        <span class="text-sm font-medium text-slate-600">Бессрочный курс</span>
+                        <p class="text-xs text-slate-400">Принимать постоянно</p>
+                    </div>
+                </label>
+
+                <!-- Schedule -->
+                <div class="border-t border-slate-100 pt-4 mt-4">
+                    <p class="text-sm font-medium text-slate-600 mb-3">Расписание на день</p>
+                    <div class="grid grid-cols-2 gap-2 mb-4">
+                        <label class="flex items-center gap-2 bg-slate-50 rounded-lg px-3 py-2.5 cursor-pointer hover:bg-slate-100 transition-colors">
+                            <input type="checkbox" id="courseScheduleMorning" class="w-4 h-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500 cursor-pointer">
+                            <span class="text-sm text-slate-600">🌅 Утро</span>
+                        </label>
+                        <label class="flex items-center gap-2 bg-slate-50 rounded-lg px-3 py-2.5 cursor-pointer hover:bg-slate-100 transition-colors">
+                            <input type="checkbox" id="courseScheduleDay" class="w-4 h-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500 cursor-pointer">
+                            <span class="text-sm text-slate-600">☀️ День</span>
+                        </label>
+                        <label class="flex items-center gap-2 bg-slate-50 rounded-lg px-3 py-2.5 cursor-pointer hover:bg-slate-100 transition-colors">
+                            <input type="checkbox" id="courseScheduleEvening" class="w-4 h-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500 cursor-pointer">
+                            <span class="text-sm text-slate-600">🌆 Вечер</span>
+                        </label>
+                        <label class="flex items-center gap-2 bg-slate-50 rounded-lg px-3 py-2.5 cursor-pointer hover:bg-slate-100 transition-colors">
+                            <input type="checkbox" id="courseScheduleNight" class="w-4 h-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500 cursor-pointer">
+                            <span class="text-sm text-slate-600">🌙 Ночь</span>
+                        </label>
+                    </div>
+
+                    <!-- Dose section -->
+                    <div id="doseSection" class="space-y-3 mb-4">
+                        <div id="singleDoseContainer" class="space-y-1.5">
+                            <label for="courseDosePerIntake" class="block text-sm font-medium text-slate-600">Доза на приём</label>
+                            <input type="text" id="courseDosePerIntake" placeholder="1 или 0,25" data-decimal
+                                class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-200">
+                        </div>
+                        <button type="button" id="toggleDifferentDosesBtn"
+                            class="hidden w-full px-4 py-2.5 text-sm font-medium text-violet-600 bg-violet-50 hover:bg-violet-100 active:bg-violet-200 rounded-xl transition-colors duration-200 items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                            <span id="toggleDifferentDosesText">Разное количество в разное время суток?</span>
+                        </button>
+                        <div id="perTimeDoseContainer" class="hidden space-y-2"></div>
+                    </div>
+
+                    <!-- Interval -->
+                    <div class="space-y-1.5">
+                        <label for="courseIntervalDays" class="block text-sm font-medium text-slate-600">Интервал (дней)</label>
+                        <input type="number" id="courseIntervalDays" min="1" placeholder="1"
+                            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-200">
+                    </div>
+                </div>
+
+                <!-- Meal condition -->
+                <div class="space-y-1.5">
+                    <label for="courseMealCondition" class="block text-sm font-medium text-slate-600">Условия приёма</label>
+                    <select id="courseMealCondition"
+                        class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-200 appearance-none cursor-pointer">
+                        <option value="" disabled selected>Выберите условие</option>
+                        <option value="до еды">до еды</option>
+                        <option value="во время еды">во время еды</option>
+                        <option value="после еды">после еды</option>
+                        <option value="не важно">не важно</option>
+                    </select>
+                </div>
+
+                <!-- Low stock reminder -->
+                <div class="space-y-1.5">
+                    <label for="courseLowStockReminder" class="block text-sm font-medium text-slate-600">Напоминание о низком остатке</label>
+                    <select id="courseLowStockReminder"
+                        class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-200 appearance-none cursor-pointer">
+                        <option value="" disabled selected>Выберите период</option>
+                        <option value="1">1 день</option>
+                        <option value="2">2 дня</option>
+                        <option value="3">3 дня</option>
+                        <option value="5">5 дней</option>
+                        <option value="7">7 дней</option>
+                        <option value="0">Не напоминать</option>
+                    </select>
+                </div>
+
+                <!-- Save button -->
+                <div class="pt-3">
+                    <button type="submit" id="saveCourseBtn" disabled
+                        class="w-full bg-violet-500 hover:bg-violet-600 active:bg-violet-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-xl shadow-sm transition-colors duration-200 flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Сохранить курс
+                    </button>
+                </div>
+            </form>
+
+            <!-- Course list -->
+            <div id="courseListContainer" class="space-y-3">
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-violet-50 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                    </div>
+                    <h2 class="text-lg font-medium text-slate-700 mb-2">Список курсов пуст</h2>
+                    <p class="text-sm text-slate-400">Создайте первый курс с помощью формы выше</p>
+                </div>
+            </div>
+
+            </div><!-- /md:grid -->
+        </div>
+    </section>
+
+    <!-- ─── Упаковки (Packages) ─── -->
+    <section id="sectionPackages" class="section hidden">
+        <div class="p-4 space-y-4">
+            <div class="md:grid md:grid-cols-2 md:gap-6">
+            <div>
+
+            <!-- Toggle Button -->
+            <button id="togglePackageFormBtn"
+                class="w-full bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white font-medium py-3 px-4 rounded-xl shadow-sm transition-colors duration-200 flex items-center justify-center gap-2 mb-4">
+                <svg id="togglePackageFormIcon" class="w-5 h-5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                <span id="togglePackageFormText">Добавить упаковку</span>
+            </button>
+
+            <!-- Package Form (collapsed) -->
+            <div id="packageFormContainer" class="hidden">
+                <form id="addPackageForm" class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4 mb-4">
+                    <div class="border-b border-slate-100 pb-3 mb-2">
+                        <h3 id="packageFormTitle" class="text-lg font-semibold text-slate-700 flex items-center gap-2">
+                            <span class="text-xl">📦</span> Новая упаковка
+                        </h3>
+                        <p class="text-sm text-slate-400 mt-1">Поля со звёздочкой обязательны</p>
+                    </div>
+
+                    <!-- Trade name -->
+                    <div class="space-y-1.5">
+                        <label for="packageTradeName" class="block text-sm font-medium text-slate-600">Торговое название <span class="text-red-400">*</span></label>
+                        <div class="relative">
+                            <input type="text" id="packageTradeName" placeholder="Введите торговое название"
+                                class="w-full px-4 py-2.5 pr-10 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
+                            <button type="button" data-clear-field="packageTradeName" class="clear-field-btn absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 hidden" title="Очистить">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                        <p id="errorTradeName" class="text-xs text-red-500 hidden">Обязательное поле</p>
+                    </div>
+
+                    <!-- Quantity -->
+                    <div class="space-y-1.5">
+                        <label for="packageQuantity" class="block text-sm font-medium text-slate-600">Количество в упаковке <span class="text-red-400">*</span></label>
+                        <input type="number" id="packageQuantity" min="1" placeholder="Например: 30"
+                            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
+                        <p id="errorQuantity" class="text-xs text-red-500 hidden">Введите количество больше 0</p>
+                    </div>
+
+                    <!-- Dosage value + unit -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1.5">
+                            <label for="packageDosageValue" class="block text-sm font-medium text-slate-600">Дозировка <span class="text-red-400">*</span></label>
+                            <input type="text" id="packageDosageValue" placeholder="Например: 20"
+                                class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
+                            <p id="errorDosageValue" class="text-xs text-red-500 hidden">Введите значение</p>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label for="packageDosageUnit" class="block text-sm font-medium text-slate-600">Единица <span class="text-red-400">*</span></label>
+                            <select id="packageDosageUnit"
+                                class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 appearance-none cursor-pointer">
+                                <option value="" disabled selected>Выберите единицу</option>
+                                <option value="г">г</option><option value="мг">мг</option><option value="мкг">мкг</option>
+                                <option value="МЕ">МЕ</option><option value="мл">мл</option><option value="шт.">шт.</option>
+                                <option value="другое">другое</option>
+                            </select>
+                            <p id="errorDosageUnit" class="text-xs text-red-500 hidden">Выберите единицу</p>
+                        </div>
+                    </div>
+
+                    <!-- Medication type -->
+                    <div class="space-y-1.5">
+                        <label for="packageType" class="block text-sm font-medium text-slate-600">Тип лекарства <span class="text-red-400">*</span></label>
+                        <select id="packageType"
+                            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 appearance-none cursor-pointer">
+                            <option value="" disabled selected>Выберите тип</option>
+                            <option value="Таблетка">Таблетка</option><option value="Капсула">Капсула</option>
+                            <option value="Капли">Капли</option><option value="Укол">Укол</option>
+                            <option value="Сироп">Сироп</option><option value="Ингалятор">Ингалятор</option>
+                            <option value="Порошок">Порошок</option><option value="Другое">Другое</option>
+                        </select>
+                        <p id="errorType" class="text-xs text-red-500 hidden">Выберите тип</p>
+                    </div>
+
+                    <!-- Optional fields divider -->
+                    <div class="border-t border-slate-100 pt-4 mt-4">
+                        <p class="text-sm text-slate-400 mb-3">Дополнительные поля (необязательные)</p>
+                    </div>
+
+                    <!-- Active ingredient -->
+                    <div class="space-y-1.5">
+                        <label for="packageActiveIngredient" class="block text-sm font-medium text-slate-600">Действующее вещество</label>
+                        <div class="relative">
+                            <input type="text" id="packageActiveIngredient" placeholder="Введите действующее вещество"
+                                class="w-full px-4 py-2.5 pr-10 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
+                            <button type="button" data-clear-field="packageActiveIngredient" class="clear-field-btn absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 hidden" title="Очистить">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Display name -->
+                    <div class="space-y-1.5">
+                        <label for="packageDisplayName" class="block text-sm font-medium text-slate-600">Отображаемое название</label>
+                        <div class="relative">
+                            <input type="text" id="packageDisplayName" placeholder="Будет сгенерировано автоматически или введите вручную"
+                                class="w-full px-4 py-2.5 pr-10 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
+                            <button type="button" data-clear-field="packageDisplayName" class="clear-field-btn absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 hidden" title="Очистить">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                        <button type="button" id="autoFillDisplayNameBtn" disabled
+                            class="mt-2 text-sm text-emerald-600 hover:text-emerald-700 disabled:text-slate-400 disabled:cursor-not-allowed flex items-center gap-1.5 transition-colors duration-200"
+                            title="Для автозаполнения: название пустое, торговое название заполнено, количество > 0, дозировка > 0, единица выбрана">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            Автозаполнить название
+                        </button>
+                    </div>
+
+                    <!-- Indications -->
+                    <div class="space-y-1.5">
+                        <label for="packageIndications" class="block text-sm font-medium text-slate-600">Показания</label>
+                        <input type="text" id="packageIndications" placeholder="Например: гипертония"
+                            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
+                    </div>
+
+                    <!-- Comment -->
+                    <div class="space-y-1.5">
+                        <label for="packageComment" class="block text-sm font-medium text-slate-600">Комментарий</label>
+                        <textarea id="packageComment" rows="3" placeholder="Дополнительная информация"
+                            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 resize-none"></textarea>
+                    </div>
+
+                    <!-- % РУСП -->
+                    <div class="space-y-1.5">
+                        <label for="packageRdaPercent" class="block text-sm font-medium text-slate-600">% от РУСП</label>
+                        <input type="text" id="packageRdaPercent" placeholder="% от РУСП"
+                            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
+                    </div>
+
+                    <!-- Save -->
+                    <div class="pt-3">
+                        <button type="submit" id="savePackageBtn" disabled
+                            class="w-full bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-xl shadow-sm transition-colors duration-200 flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Сохранить упаковку
+                        </button>
+                    </div>
+                </form>
+            </div>
+            </div>
+
+            <!-- Package list -->
+            <div id="packageListContainer" class="space-y-3">
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-amber-50 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                    </div>
+                    <h2 class="text-lg font-medium text-slate-700 mb-2">Список упаковок пуст</h2>
+                    <p class="text-sm text-slate-400">Добавьте первую упаковку с помощью кнопки выше</p>
+                </div>
+            </div>
+
+            </div><!-- /md:grid -->
+        </div>
+    </section>
+
+</main>
+
+<!-- ═══════════════════════════════════════════
+     NAV – Bottom navigation
+═══════════════════════════════════════════ -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40 shadow-lg">
+    <div class="max-w-lg md:max-w-2xl lg:max-w-3xl mx-auto px-2 flex justify-around">
+        <button data-section="sectionHome" class="nav-btn flex flex-col items-center py-3 px-4 text-slate-400 transition-colors duration-200">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            <span class="text-xs mt-1 font-medium">Главная</span>
+        </button>
+        <button data-section="sectionCalendar" class="nav-btn flex flex-col items-center py-3 px-4 text-slate-400 transition-colors duration-200">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <span class="text-xs mt-1 font-medium">Календарь</span>
+        </button>
+        <button data-section="sectionCourses" class="nav-btn flex flex-col items-center py-3 px-4 text-slate-400 transition-colors duration-200">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+            <span class="text-xs mt-1 font-medium">Курсы</span>
+        </button>
+        <button data-section="sectionPackages" class="nav-btn flex flex-col items-center py-3 px-4 text-slate-400 transition-colors duration-200">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            <span class="text-xs mt-1 font-medium">Упаковки</span>
+        </button>
+    </div>
+</nav>
+
+<!-- Toast -->
+<div id="toastContainer" class="fixed bottom-24 left-4 right-4 max-w-lg md:max-w-2xl lg:max-w-3xl mx-auto z-50 pointer-events-none">
+    <div id="toast" class="bg-slate-800 text-white px-5 py-3 rounded-xl shadow-lg text-center text-sm font-medium transform transition-all duration-300 toast-hide">
+        <span id="toastMessage">Уведомление</span>
+    </div>
+</div>
+
+<!-- Entry point (ES module) -->
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
