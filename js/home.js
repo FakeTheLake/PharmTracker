@@ -62,7 +62,7 @@ export function renderHome() {
             </div>
 
             <!-- Intakes List -->
-            <div id="home-intakes-list" class="space-y-3 pb-4">
+            <div id="home-intakes-list" class="space-y-3 pb-8">
                 <!-- Intakes will be injected here -->
             </div>
         </div>
