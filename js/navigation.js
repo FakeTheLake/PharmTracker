@@ -38,14 +38,26 @@ export function initNavigation(initialSection = 'home') {
         const sectionDiv = document.createElement('section');
         sectionDiv.id = `section-${sec.id}`;
         sectionDiv.className = 'w-full h-full hidden flex-col animate-fade-in';
-        sectionDiv.innerHTML = `
-            <h2 class="text-2xl font-bold mb-4 text-gray-800">${Object.values(APP_CONFIG.LABELS.HEADERS)[sections.indexOf(sec)]}</h2>
-            <div id="${sec.id}-container" class="flex-1">
-                <div class="p-8 text-center text-gray-400 border-2 border-dashed border-gray-200 rounded-xl">
-                    ${APP_CONFIG.LABELS.PLACEHOLDERS.SECTION_DEV}
+        
+        // Home section doesn't need a header - home.js renders its own content
+        if (sec.id === 'home') {
+            sectionDiv.innerHTML = `
+                <div id="${sec.id}-container" class="flex-1">
+                    <div class="p-8 text-center text-gray-400 border-2 border-dashed border-gray-200 rounded-xl">
+                        ${APP_CONFIG.LABELS.PLACEHOLDERS.SECTION_DEV}
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+        } else {
+            sectionDiv.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4 text-gray-800">${Object.values(APP_CONFIG.LABELS.HEADERS)[sections.indexOf(sec)]}</h2>
+                <div id="${sec.id}-container" class="flex-1">
+                    <div class="p-8 text-center text-gray-400 border-2 border-dashed border-gray-200 rounded-xl">
+                        ${APP_CONFIG.LABELS.PLACEHOLDERS.SECTION_DEV}
+                    </div>
+                </div>
+            `;
+        }
         content.appendChild(sectionDiv);
     });
 
