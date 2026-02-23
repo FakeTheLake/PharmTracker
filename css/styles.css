@@ -11,9 +11,21 @@
     scrollbar-width: none;
 }
 
-/* iOS Safe Area */
+/* Safe Area for iOS and Android browsers */
 .pb-safe {
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Extra padding for Android browsers with bottom bars */
+@supports not (padding-bottom: env(safe-area-inset-bottom)) {
+    .pb-safe {
+        padding-bottom: 8px;
+    }
+}
+
+/* Main container should account for nav height */
+.main-with-nav {
+    padding-bottom: 1rem;
 }
 
 /* =====================================================
