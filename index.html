@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans h-screen flex flex-col overflow-hidden">
+<body class="bg-gray-50 text-gray-800 font-sans h-[100dvh] flex flex-col overflow-hidden">
 
     <!-- Header -->
     <header class="flex-none bg-white border-b border-gray-200 px-4 py-3 shadow-sm z-10">
@@ -25,13 +25,13 @@
     </header>
 
     <!-- Main Content -->
-    <main id="app-content" class="flex-1 overflow-y-auto overflow-x-hidden p-4 pb-6 relative w-full max-w-md mx-auto">
+    <main id="app-content" class="flex-1 overflow-y-auto overflow-x-hidden p-4 relative w-full max-w-md mx-auto">
         <!-- Dynamic content injected here -->
     </main>
 
     <!-- Navigation -->
-    <nav class="flex-none bg-white border-t border-gray-200 z-10 pb-4" style="padding-bottom: max(env(safe-area-inset-bottom, 0px), 1rem);">
-        <div class="max-w-md mx-auto flex justify-around items-center h-14" id="main-nav">
+    <nav class="flex-none bg-white border-t border-gray-200 pb-safe z-10 w-full">
+        <div class="max-w-md mx-auto flex justify-around items-center h-16 px-2" id="main-nav">
             <!-- Nav items injected by JS -->
         </div>
     </nav>
