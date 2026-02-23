@@ -11,9 +11,21 @@
     scrollbar-width: none;
 }
 
-/* iOS Safe Area */
+/* iOS & Modern Mobile Safe Area */
 .pb-safe {
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Ensure the app fits the dynamic viewport */
+html, body {
+    height: 100%;
+    height: -webkit-fill-available;
+    overflow: hidden;
+}
+
+body {
+    min-height: 100vh;
+    min-height: 100dvh;
 }
 
 /* =====================================================
