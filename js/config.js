@@ -14,7 +14,7 @@ export const APP_CONFIG = {
             PACKAGES: 'Упаковки'
         },
         HEADERS: {
-            HOME: 'Сегодня',
+            HOME: 'Главная',
             CALENDAR: 'Календарь приема',
             COURSES: 'Мои курсы',
             PACKAGES: 'Моя аптечка',
