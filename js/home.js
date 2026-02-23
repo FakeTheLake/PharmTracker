@@ -127,9 +127,9 @@ function formatSelectedDate(date) {
     const selected = new Date(date);
     selected.setHours(0, 0, 0, 0);
 
-    // if (selected.getTime() === today.getTime()) {
-    //     return 'сегодня';
-    // }
+    if (selected.getTime() === today.getTime()) {
+        return 'сегодня';
+    }
 
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
