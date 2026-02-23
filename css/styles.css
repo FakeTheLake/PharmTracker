@@ -11,21 +11,21 @@
     scrollbar-width: none;
 }
 
-/* Safe Area for iOS and Android browsers */
+/* iOS & Modern Mobile Safe Area */
 .pb-safe {
     padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* Extra padding for Android browsers with bottom bars */
-@supports not (padding-bottom: env(safe-area-inset-bottom)) {
-    .pb-safe {
-        padding-bottom: 8px;
-    }
+/* Ensure the app fits the dynamic viewport */
+html, body {
+    height: 100%;
+    height: -webkit-fill-available;
+    overflow: hidden;
 }
 
-/* Main container should account for nav height */
-.main-with-nav {
-    padding-bottom: 1rem;
+body {
+    min-height: 100vh;
+    min-height: 100dvh;
 }
 
 /* =====================================================
